@@ -5,3 +5,5 @@ unstructured
 langchain_mistralai 
 langchain_huggingface
 huggingface_hub
+streamlit
+langchain-community
