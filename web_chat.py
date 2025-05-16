@@ -16,8 +16,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 
 # Page Configuration
-st.set_page_config(page_title="Chatbot UI", page_icon="💬")
-st.title("💬 Simple Chatbot")
+st.set_page_config(page_title="Custom Web Chatbot", page_icon="💬")
+st.title("💬 Custome Web Chatbot")
 
 # Session State Management
 if "messages" not in st.session_state:
@@ -89,13 +89,13 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Simulated Bot Response (Replace with your logic)
-def get_bot_response(user_input):
+def get_bot_response(user_input, rag_chain):
     
     result = rag_chain.invoke({"query": user_input}) # Use 'query' as the input key for RetrievalQA chain  
     # Simulate processing time
     time.sleep(0.5)
     
-    # Return random response
+    # Return Ai response
     return result['result']
 
 # Chat Interface
@@ -113,7 +113,7 @@ if prompt := st.chat_input("Type your message here..."):
         full_response = ""
         
         # Simulate typing animation
-        bot_response = get_bot_response(prompt)
+        bot_response = get_bot_response(prompt,st.session_state.rag_chain)
         for chunk in bot_response.split():
             full_response += chunk + " "
             time.sleep(0.1)
