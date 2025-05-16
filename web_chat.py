@@ -17,7 +17,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 # Page Configuration
 st.set_page_config(page_title="Custom Web Chatbot", page_icon="💬")
-st.title("💬 Custome Web Chatbot")
+st.title("💬 Custom Web Chatbot")
 
 # Session State Management
 if "messages" not in st.session_state:
