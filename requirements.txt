@@ -1,0 +1,7 @@
+sentence-transformers 
+faiss-cpu 
+langchain 
+unstructured 
+langchain_mistralai 
+langchain_huggingface
+huggingface_hub
