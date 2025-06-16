@@ -7,3 +7,6 @@ langchain_huggingface
 huggingface_hub
 streamlit
 langchain-community
+langchain-google-genai
+langgraph
+python-dotenv

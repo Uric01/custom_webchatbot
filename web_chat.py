@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import os
 
+
 # LangChain imports
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -9,12 +10,15 @@ from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-from langchain_mistralai import ChatMistralAI
 from langchain_huggingface import HuggingFaceEmbeddings
-
+from dotenv import load_dotenv
 # --- Streamlit Page Setup ---
-st.set_page_config(page_title="Custom Web Chatbot", page_icon="💬")
-st.title("💬 Custom Web Chatbot")
+from llms.gemini_model_ import get_gemini
+from llms.mistralai import get_mistralai_model
+
+st.set_page_config(
+    page_title="Custom Web Chatbot", page_icon="🤖")
+st.title("🤖 Custom Web Chatbot")
 
 # --- Session State Defaults ---
 if "messages" not in st.session_state:
@@ -29,21 +33,20 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
-    llm_api_key = st.text_input(
-        "LLM API Key",
-        type="password",
-        placeholder="Enter your MistralAI API key here",
-    )
+    load_dotenv()
+    gemini_api_key = os.getenv("GEMINIAPI_KEY")
+    mistralai_api_key = os.getenv("MISTRALAI_KEY")
+
     urls = []
     for i in range(1, 4):
-        link = st.text_input(f"Web Source Link {i}", placeholder="https://example.com/…")
+        link = st.text_input(
+            f"Web Source Link {i}", placeholder="https://example.com/..."
+        )
         if link:
             urls.append(link)
 
     if st.button("🔗 Load & Index Sources"):
-        if not llm_api_key:
-            st.error("❌ Please enter your MistralAI API key.")
-        elif not urls:
+        if not urls:
             st.error("❌ Please enter at least one URL.")
         else:
             try:
@@ -51,7 +54,8 @@ with st.sidebar:
                 loader = UnstructuredURLLoader(urls=urls)
                 data = loader.load()
                 if not data:
-                    raise ValueError("No content loaded from the provided URLs.")
+                    raise ValueError(
+                        "No content loaded from the provided URLs.")
 
                 # 2) Split into chunks
                 splitter = CharacterTextSplitter(
@@ -65,33 +69,61 @@ with st.sidebar:
                 )
                 vector_store = FAISS.from_documents(chunks, embeddings)
 
-                # 4) LLM setup
-                os.environ["MISTRAL_API_KEY"] = llm_api_key
-                llm = ChatMistralAI(model="mistral-large-latest", temperature=0)
+                # 4) LLM setup with fallback
+                llm = None
+                # Try MistralAI
+                try:
 
-                # 5) Retriever
+                    if "GEMINIAPI_KEY" in os.environ:
+
+                        llm = get_gemini()
+                        _ = llm.invoke("ping")
+                        st.success("✅ Using Gemini as primary LLM.")
+                    else:
+                        raise ValueError(
+                            "No Gemini key provided .")
+                except Exception as gemini_err:
+                    st.error(f"⚠️ Gemini failed {gemini_err}")
+                    # Fallback to Gemini
+                    try:
+                        if "MISTRALAI_KEY" in os.environ:
+
+                            llm = get_mistralai_model()
+                            # Test connection
+                            _ = llm.invoke("ping")
+                            st.success("✅ Using MistralAI as fallback LLM.")
+                        else:
+                            raise ValueError(
+                                "No MistralAI key provided for fallback.")
+                    except Exception as mistral_err:
+
+                        st.warning(f"❌ Both LLMs failed: {mistral_err}")
+                    raise gemini_err
+
+                # 5) Retriever setup
                 retriever = vector_store.as_retriever(
-                    search_type="similarity", search_kwargs={"k": 3}
-                )
+                    search_type="similarity", search_kwargs={"k": 3})
 
                 # 6) Prompt template
-                prompt_template = """
-You are a friendly, talkative assistant. Your naname is Zeema. Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know.
+                prompt_template = '''
+                                    You are a friendly, talkative assistant. Use the following pieces of context to answer the question at the end.
+                                    If you don't know the answer, just say that you don't know.
 
-{context}
+                                    {context}
 
-Question: {question}
-"""
+                                    Question: {question}
+                                
+                                   '''
                 RAG_PROMPT = PromptTemplate(
-                    template=prompt_template, input_variables=["context", "question"]
+                    template=prompt_template,
+                    input_variables=["context", "question"],
                 )
 
-                # 7) Memory with explicit output_key
+                # 7) Memory
                 memory = ConversationBufferMemory(
                     memory_key="chat_history",
                     return_messages=True,
-                    output_key="answer",  # ← fix for multiple output keys
+                    output_key="answer",
                 )
 
                 # 8) Conversational RAG chain
@@ -104,7 +136,8 @@ Question: {question}
                 )
 
                 st.session_state.conv_chain = conv_chain
-                st.success("✅ Sources loaded and conversational chain initialized!")
+                st.success("🚀 Sources loaded and conversation chain ready!")
+
             except Exception as e:
                 st.error(f"Error setting up chain: {e}")
 
@@ -114,12 +147,15 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # --- Bot Response Function ---
+
+
 def get_bot_response(question, conv_chain):
     try:
         result = conv_chain({"question": question})
         return result["answer"]
     except Exception as e:
         return f"❌ Model error: {e}"
+
 
 # --- Chat Input & Rendering ---
 if user_input := st.chat_input("Type your message here..."):
@@ -132,9 +168,9 @@ if user_input := st.chat_input("Type your message here..."):
     if st.session_state.conv_chain:
         bot_reply = get_bot_response(user_input, st.session_state.conv_chain)
     else:
-        bot_reply = "❌ Please load web sources first in the sidebar."
+        bot_reply = "❌ Please load sources first in the sidebar."
 
-    # Simulate typing
+    # Simulate typing effect
     with st.chat_message("assistant"):
         placeholder = st.empty()
         full_text = ""
@@ -145,4 +181,5 @@ if user_input := st.chat_input("Type your message here..."):
         placeholder.markdown(full_text)
 
     # Log assistant message
-    st.session_state.messages.append({"role": "assistant", "content": full_text})
+    st.session_state.messages.append(
+        {"role": "assistant", "content": full_text})
