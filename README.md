@@ -80,7 +80,7 @@ streamlit run your_script.py
 
 ## 📸 Screenshot
 
-![Chatbot Screenshot](screenshot.png)
+![Chatbot Screenshot](custom_webchat.png)
 
 ---
 
