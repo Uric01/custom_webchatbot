@@ -86,4 +86,4 @@ streamlit run your_script.py
 
 ## 📄 License
 
-MIT License — feel free to fork and build on it.
+MIT License. feel free to fork and build on it.
