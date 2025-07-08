@@ -26,7 +26,7 @@ if "messages" not in st.session_state:
 if "conv_chain" not in st.session_state:
     st.session_state.conv_chain = None
 
-# --- Sidebar Controls ---
+# --- Sidebar Controls -----
 with st.sidebar:
     st.header("Settings")
     if st.button("🔄 Reset Conversation"):
