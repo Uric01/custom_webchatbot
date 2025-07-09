@@ -134,7 +134,8 @@ with st.sidebar:
                     return_source_documents=True,
                     combine_docs_chain_kwargs={"prompt": RAG_PROMPT},
                 )
-
+                #Initiates conversation
+                st.session_state.messages = [{"role": "assistant", "content": "Hi, I am Zeema! How may I help you today?🙂"}]
                 st.session_state.conv_chain = conv_chain
                 st.success("🚀 Sources loaded and conversation chain ready!")
 
@@ -163,7 +164,7 @@ if user_input := st.chat_input("Type your message here..."):
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
-
+  
     # Generate bot response
     if st.session_state.conv_chain:
         bot_reply = get_bot_response(user_input, st.session_state.conv_chain)
