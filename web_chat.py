@@ -37,7 +37,9 @@ with st.sidebar:
     gemini_api_key = os.getenv("GEMINIAPI_KEY")
     mistralai_api_key = os.getenv("MISTRALAI_KEY")
 
-    urls = []
+
+    
+    urls = [] #load the URLs
     for i in range(1, 4):
         link = st.text_input(
             f"Web Source Link {i}", placeholder="https://example.com/..."
