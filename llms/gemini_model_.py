@@ -29,5 +29,4 @@ def get_gemini():
         max_tokens=None,
         timeout=None,
         max_retries=2,
-        # other params...
     )
