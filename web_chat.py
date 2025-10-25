@@ -8,9 +8,9 @@ import os
 from langchain_community.document_loaders import UnstructuredURLLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
+from langchain_community.chains import ConversationalRetrievalChain
+from langchain_community.prompts import PromptTemplate
+from langchain_community.memory import ConversationBufferMemory
 from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 # --- Streamlit Page Setup ---
@@ -187,6 +187,7 @@ if user_input := st.chat_input("Type your message here..."):
     # Log assistant message
     st.session_state.messages.append(
         {"role": "assistant", "content": full_text})
+
 
 
 
