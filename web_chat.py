@@ -7,7 +7,7 @@ import os
 #from langchain.document_loaders import UnstructuredURLLoader
 from langchain_community.document_loaders import UnstructuredURLLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
@@ -187,6 +187,7 @@ if user_input := st.chat_input("Type your message here..."):
     # Log assistant message
     st.session_state.messages.append(
         {"role": "assistant", "content": full_text})
+
 
 
 
